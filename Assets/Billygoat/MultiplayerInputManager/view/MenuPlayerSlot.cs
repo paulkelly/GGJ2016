@@ -7,6 +7,9 @@ namespace Billygoat.MultiplayerInput
     public class MenuPlayerSlot : View
     {
         [Inject]
+        public IMultiInputManager InputManager { get; set; }
+
+        [Inject]
         public MultiInputSignals InputSignals { get; set; }
 
         public int SlotNumber;
@@ -16,6 +19,7 @@ namespace Billygoat.MultiplayerInput
         public void OnConstruct()
         {
             InputSignals.PlayerJoined.AddListener(OnPlayerJoined);
+            InputSignals.PlayerRemoved.AddListener(OnPlayerLeft);
 
             _image = GetComponent<Image>();
         }
@@ -25,6 +29,7 @@ namespace Billygoat.MultiplayerInput
             base.OnDestroy();
 
             InputSignals.PlayerJoined.RemoveListener(OnPlayerJoined);
+            InputSignals.PlayerRemoved.AddListener(OnPlayerLeft);
         }
 
         private PlayerData _playerData;
@@ -37,21 +42,42 @@ namespace Billygoat.MultiplayerInput
             }
         }
 
+        public void OnPlayerLeft(PlayerData playerData)
+        {
+            if (playerData.id == SlotNumber)
+            {
+                _playerData = null;
+            }
+        }
+
         void Update()
         {
             if (_playerData != null)
             {
-                if (_playerData.Device.Action1.ButtonUp)
+                if (_playerData.InControlDevice.Action1.WasReleased)
                 {
                     _playerData.Ready = true;
                 }
-                else if (_playerData.Device.Action2.ButtonUp)
+                else if (_playerData.InControlDevice.Action2.WasReleased)
                 {
-                    _playerData.Ready = false;
+                    if(_playerData.Ready)
+                    {
+                        _playerData.Ready = false;
+                    }
+                    else
+                    {
+                        InputManager.TryRemovePlayer(_playerData);
+                    }
+                    
                 }
             }
 
             SetImage();
+        }
+
+        protected virtual void OnReady()
+        {
+
         }
 
         protected virtual void SetImage()

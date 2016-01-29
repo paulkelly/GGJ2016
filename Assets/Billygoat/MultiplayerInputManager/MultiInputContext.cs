@@ -16,8 +16,8 @@ namespace Billygoat.MultiplayerInput
         {
             base.mapBindings();
 
-            injectionBinder.Bind<MultiInputSignals>().ToSingleton();
-            injectionBinder.Bind<IMultiInputManager>().To<MultiInputManager>().ToSingleton();
+            injectionBinder.Bind<MultiInputSignals>().ToSingleton().CrossContext();
+            injectionBinder.Bind<IMultiInputManager>().To<MultiInputManager>().ToSingleton().CrossContext();
         }
     }
 }

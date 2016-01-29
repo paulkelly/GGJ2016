@@ -13,13 +13,18 @@ namespace Billygoat.MultiplayerInput
     {
         private const string GAMEOBJECT_NAME = "InControl";
 
-        private static int _nextId = 0;
-        private static int NextId
+        private int NextId
         {
             get
             {
-                _nextId++;
-                return _nextId;
+                for(int i=1; i<=10; i++)
+                {
+                    if(!HasPlayerId(i))
+                    {
+                        return i;
+                    }
+                }
+                return 0;
             }
         }
 
@@ -36,6 +41,32 @@ namespace Billygoat.MultiplayerInput
             get { return Devices.Values.ToArray(); }
         }
 
+        private PlayerData GetPlayer(int id)
+        {
+            foreach (var player in AllPlayers)
+            {
+                if(player.id == id)
+                {
+                    return player;
+                }
+            }
+
+            return null;
+        }
+
+        private bool HasPlayerId(int id)
+        {
+            foreach (var player in AllPlayers)
+            {
+                if (player.id == id)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         [PostConstruct]
         public void SetupInControl()
         {
@@ -47,7 +78,7 @@ namespace Billygoat.MultiplayerInput
                 go.transform.parent = contextView.transform;
             }
 
-            //InControl.InputManager.OnDeviceDetached
+            InControl.InputManager.OnDeviceDetached += TryRemovePlayer;
         }
 
         public void TryRegisterDevice(InputDevice device)
@@ -57,12 +88,29 @@ namespace Billygoat.MultiplayerInput
                 PlayerData newPlayer = new PlayerData()
                 {
                     id = NextId,
-                    Device = new InControlDevice(device)
+                    InControlDevice = device
                 };
                 Devices.Add(device, newPlayer);
 
                 InputSignals.PlayerJoined.Dispatch(newPlayer);
             }
+        }
+
+        public void TryRemovePlayer(InputDevice device)
+        {
+            if (Devices.ContainsKey(device))
+            {
+                PlayerData toRemove;
+                Devices.TryGetValue(device, out toRemove);
+                Devices.Remove(device);
+
+                InputSignals.PlayerRemoved.Dispatch(toRemove);
+            }
+        }
+
+        public void TryRemovePlayer(PlayerData player)
+        {
+            TryRemovePlayer(player.InControlDevice);
         }
 
         public PlayerData[] GetPlayers()

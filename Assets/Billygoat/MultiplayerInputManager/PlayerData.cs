@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using InControl;
 using Billygoat.InputManager;
 
 namespace Billygoat.MultiplayerInput
@@ -7,7 +6,7 @@ namespace Billygoat.MultiplayerInput
     public class PlayerData
     {
         public int id;
-        public IDevice Device;
+        public InputDevice InControlDevice;
 
         public bool Ready = false;
     }
