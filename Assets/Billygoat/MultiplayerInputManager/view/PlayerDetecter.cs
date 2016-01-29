@@ -8,16 +8,23 @@ namespace Billygoat.MultiplayerInput
     {
 
         [Inject]
-        public MenuButtonPressed MenuPressedSignal { get; set; }
+        public IMultiInputManager InputManager { get; set; }
 
         void Update()
         {
-            foreach (var device in InControl.InputManager.Devices)
+            if (InControl.InputManager.IsSetup)
             {
-                if (device.MenuWasPressed)
+                foreach (var device in InControl.InputManager.Devices)
                 {
-                    MenuPressedSignal.Dispatch(device);
+                    if (device.MenuWasPressed)
+                    {
+                        InputManager.TryRegisterDevice(device);
+                    }
                 }
+            }
+            else
+            {
+                Debug.Log("IM not setup");
             }
         }
     }

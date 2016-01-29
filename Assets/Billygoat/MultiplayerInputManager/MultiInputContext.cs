@@ -15,6 +15,9 @@ namespace Billygoat.MultiplayerInput
         protected override void mapBindings()
         {
             base.mapBindings();
+
+            injectionBinder.Bind<MultiInputSignals>().ToSingleton();
+            injectionBinder.Bind<IMultiInputManager>().To<MultiInputManager>().ToSingleton();
         }
     }
 }

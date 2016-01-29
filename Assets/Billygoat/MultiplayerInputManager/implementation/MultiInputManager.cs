@@ -26,17 +26,14 @@ namespace Billygoat.MultiplayerInput
         [Inject(ContextKeys.CONTEXT_VIEW)]
         public GameObject contextView { get; set; }
 
+        [Inject]
+        public MultiInputSignals InputSignals { get; set; }
+
         private Dictionary<InputDevice, PlayerData> Devices = new Dictionary<InputDevice, PlayerData>();
 
         private PlayerData[] AllPlayers
         {
             get { return Devices.Values.ToArray(); }
-        }
-
-        private void AddNewPlayer()
-        {
-            //InControlDevice activeDevice = new InControlDevice(InControl.InputManager.ActiveDevice);
-            //Players.Add(player.id, player.Device);
         }
 
         [PostConstruct]
@@ -64,6 +61,7 @@ namespace Billygoat.MultiplayerInput
                 };
                 Devices.Add(device, newPlayer);
 
+                InputSignals.PlayerJoined.Dispatch(newPlayer);
             }
         }
 

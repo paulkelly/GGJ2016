@@ -7,9 +7,4 @@ namespace Billygoat.MultiplayerInput
     {
         public Signal<PlayerData> PlayerJoined = new Signal<PlayerData>();
     }
-
-    public class MenuButtonPressed : Signal<InputDevice>
-    {
-        
-    }
 }
