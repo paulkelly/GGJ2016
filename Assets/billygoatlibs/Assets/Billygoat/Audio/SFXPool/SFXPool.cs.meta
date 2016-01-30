@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2e56a63cade138047b9f171784376c2a
+timeCreated: 1449760593
+licenseType: Pro
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - BaseAudioSettings: {fileID: 194662, guid: e845bb6fa0f5d8547a215073c966bc23, type: 2}
+  - DefaultAudioSettingPrefab: {fileID: 199544, guid: 3ec1a0e2d271be942a31a522b48e5330,
+      type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
