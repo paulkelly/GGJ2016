@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Billygoat.MultiplayerInput;
 using System.Collections;
 
 namespace GGJ2016
@@ -8,7 +9,30 @@ namespace GGJ2016
         [Inject ("FemalePigeon")]
         public GameObject Female { get; set; }
 
-        public Transform Male;
+        [Inject]
+        public PigeonSignals ThePigeonSignals { get; set; }
+
+        private PlayerData player;
+
+        private Transform _male;
+        public Transform Male
+        {
+            get
+            {
+                return _male;
+            }
+
+            set
+            {
+                _male = value;
+                PigeonController controller = value.GetComponent<PigeonController>();
+
+                if(controller != null)
+                {
+                    player = controller.Player;
+                }
+            }
+        }
 
         public const float MaxPuffyness = 3;
         public const float MinPuffyness = 1;
@@ -27,17 +51,33 @@ namespace GGJ2016
             Puffyness = Mathf.Min(MaxPuffyness, Puffyness + PuffynessIncreaseRate);
         }
 
+        public void AddScore(float amount)
+        {
+            Score += amount * Puffyness;
+        }
+
         public void Update()
         {
             Puffyness = Mathf.Max(MinPuffyness, Puffyness - (PuffynessDecayRate * Time.deltaTime));
             Score = Mathf.Max(0, Score - GetScoreDecayRate());
+
+            if(player != null)
+            {
+                ScoreData data = new ScoreData()
+                {
+                    Player = player,
+                    Score = this.Score
+                };
+                ThePigeonSignals.SetPigeonScore.Dispatch(data);
+            }
         }
 
         private float GetScoreDecayRate()
         {
             float dist = Vector3.Distance(Male.position, Female.transform.position);
-            //return Time.deltaTime * Mathf.Log(dist + 1, 2);
-            return Time.deltaTime * Mathf.Log(dist + 1, 2.718f);
+
+            //return Time.deltaTime * Mathf.Log(dist + 1, 2.718f);
+            return Time.deltaTime * Mathf.Log(dist + 1, 2) * 3;
         }
 
     }

@@ -104,7 +104,7 @@ namespace GGJ2016
 
         public void OnSwoopDown()
         {
-
+            Scorer.AddScore(2);
         }
 
         public void OnSwoopUp()

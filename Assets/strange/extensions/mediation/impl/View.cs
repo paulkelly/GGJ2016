@@ -123,7 +123,6 @@ namespace strange.extensions.mediation.impl
 						IContext context = contextView.context;
 						if (toAdd)
 						{
-                            Debug.Log("Add To Context: " + name);
 							context.AddView(view);
 							registeredWithContext = true;
 							return;
