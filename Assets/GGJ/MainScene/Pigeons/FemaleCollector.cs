@@ -10,7 +10,7 @@ namespace GGJ2016
 
         public float GetScoreMulti()
         {
-            float max = 0;
+            float max = 0.2f;
 
             foreach(var collider in ScoreColliders)
             {

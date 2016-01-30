@@ -12,10 +12,12 @@ namespace GGJ2016
         [Inject]
         public PigeonSignals ThePigeonSignals { get; set; }
 
-        private const float turnSpeed = 1000f;
+        private const float turnSpeed = 600f;
 
         private PigeonAnimatorDriver _animatorDriver;
         private FemaleCollector _collector;
+
+        private PigeonIKTarget _lookTarget;
 
         [PostConstruct]
         public void OnConstruct()
@@ -46,6 +48,7 @@ namespace GGJ2016
             _animatorDriver = new PigeonAnimatorDriver(FindAnimator());
             _collector = GetComponentInChildren<FemaleCollector>(true);
             _rigidbody = GetComponent<Rigidbody>();
+            _lookTarget = GetComponentInChildren<PigeonIKTarget>(true);
 
             DirectionVector = transform.forward;
 
@@ -59,8 +62,32 @@ namespace GGJ2016
         private const float SpeedMulti = 1;
         private const float AccTime = 0.2f;
 
+        private void FixedUpdate()
+        {
+            _rigidbody.velocity = Vector3.zero;
+        }
+
         private void Update()
         {
+            if (Swooping)
+            {
+                Scorer.AddScore(10 * Time.deltaTime * _collector.GetScoreMulti());
+            }
+
+            if (distractionTime > endDistractionTim)
+            {
+                distractionTime = 0;
+                endDistractionTim = Random.Range(minDistractionTime, maxDistractionTime);
+
+                PickDistractedDirection();
+            }
+            else
+            {
+                distractionTime += Time.deltaTime;
+            }
+
+            _animatorDriver.Swooping = Swooping;
+
             Scorer.Update();
 
             Rotate(DirectionVector);
@@ -68,6 +95,29 @@ namespace GGJ2016
             //Speed = Mathf.SmoothDamp(Speed, TargetSpeed * SpeedMulti, ref Acc, AccTime);
             _animatorDriver.Speed = Mathf.SmoothDamp(_animatorDriver.Speed, TargetSpeed * SpeedMulti, ref Acc, AccTime);
             transform.position += transform.forward * Speed * Time.deltaTime;
+        }
+
+        private bool Distrated = false;
+        private Vector3 DistrationVector;
+
+        public float Control = 1;
+
+        private float distractionTime = 0;
+        private float endDistractionTim = 0;
+
+        float minDistractionTime = 0.2f;
+        float maxDistractionTime = 0.5f;
+        private void PickDistractedDirection()
+        {
+
+            if (_lookTarget != null)
+            {
+                //DistrationVector = transform.position - _lookTarget.position;
+
+                // DistrationVector = Vector3.Lerp(Vector3.left, Vector3.right, Random.Range(0f, 1f)).normalized;
+
+                DistrationVector = ConvertToWorldVector(new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized);
+            }
         }
 
         private void OnAnimatorMove()
@@ -90,7 +140,15 @@ namespace GGJ2016
 
         public void Move(Vector2 value)
         {
-            TargetSpeed = value.magnitude;
+
+            if (Swooping)
+            {
+                DirectionVector = transform.forward;
+                TargetSpeed = 2;
+                return;
+            }
+
+                TargetSpeed = value.magnitude;
             if (TargetSpeed < 0.3)
             {
                 DirectionVector = transform.forward;
@@ -98,19 +156,38 @@ namespace GGJ2016
             }
             else
             {
-                Vector3 worldVector = (new Vector3(value.x, 0, value.y));
-                worldVector = Camera.main.transform.TransformDirection(worldVector);
-                worldVector = new Vector3(worldVector.x, 0, worldVector.z);
-                DirectionVector = worldVector.normalized * TargetSpeed;
+                DirectionVector = ConvertToWorldVector(value);
             }
+        }
+
+        private Vector3 ConvertToWorldVector(Vector3 input)
+        {
+            Vector3 worldVector = (new Vector3(input.x, 0, input.y));
+            worldVector = Camera.main.transform.TransformDirection(worldVector);
+            worldVector = new Vector3(worldVector.x, 0, worldVector.z);
+            return worldVector.normalized * TargetSpeed;
         }
 
         private void Rotate(Vector3 dir)
         {
+
+            if (Swooping)
+            {
+                //dir = DistrationVector;
+                Control = 0.2f;
+            }
+            else
+            {
+                Control = 1f;
+            }
+
+            dir = Vector3.Lerp(DistrationVector, dir, Control);
+
+            float TurnSpeedMulti = 1 / Mathf.Max(_animatorDriver.Speed, 1);
             if (dir.magnitude > 0.1f)
             {
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir),
-                    turnSpeed * Time.deltaTime);
+                    dir.magnitude * turnSpeed * Time.deltaTime * TurnSpeedMulti);
             }
         }
 
@@ -119,14 +196,15 @@ namespace GGJ2016
             Scorer.AddPuffyness();
         }
 
+        private bool Swooping = false;
         public void OnSwoopDown()
         {
-            Scorer.AddScore(2 * _collector.GetScoreMulti());
+            Swooping = true;
         }
 
         public void OnSwoopUp()
         {
-
+            Swooping = false;
         }
 
         public void Caw()

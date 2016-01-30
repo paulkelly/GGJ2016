@@ -22,4 +22,17 @@ public class PigeonAnimatorDriver
             _animator.SetFloat("Speed", value);
         }
     }
+
+    public bool Swooping
+    {
+        get
+        {
+            return _animator.GetBool("Sprint");
+        }
+
+        set
+        {
+            _animator.SetBool("Sprint", value);
+        }
+    }
 }

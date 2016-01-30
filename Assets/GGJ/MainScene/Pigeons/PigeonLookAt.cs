@@ -12,6 +12,8 @@ namespace GGJ2016
 
         public List<InterestingTarget> Targets = new List<InterestingTarget>();
 
+        public PigeonIKTarget lookAtTarget;
+
         private float lookTime;
         private float maxLookTime;
 
@@ -33,7 +35,6 @@ namespace GGJ2016
             {
                 lookTime = 0;
                 SetLookAtWeight(0);
-                LookIK.solver.target = null;
             }
 
             if(LookIK.solver.IKPositionWeight != _targetWeight)
@@ -85,7 +86,8 @@ namespace GGJ2016
             lookTime = 0;
             maxLookTime = Random.Range(0.5f, 3);
 
-            LookIK.solver.target = target.transform;
+            lookAtTarget.Target = target.transform;
+            LookIK.solver.target = lookAtTarget.transform;
         }
 
         private void OnTriggerEnter(Collider other)
