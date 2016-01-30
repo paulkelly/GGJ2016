@@ -23,25 +23,29 @@ namespace GGJ2016
             Scorer.Male = transform;
         }
 
+        private Rigidbody _rigidbody;
+
+        private Animator _animator;
         private Animator FindAnimator()
         {
-            Animator animator = GetComponent<Animator>();
-            if (animator == null)
+            _animator = GetComponent<Animator>();
+            if (_animator == null)
             {
-                animator = GetComponentInChildren<Animator>();
+                _animator = GetComponentInChildren<Animator>();
             }
-            if (animator == null)
+            if (_animator == null)
             {
                 Debug.LogError("Could not find animator for: " + name);
             }
 
-            return animator;
+            return _animator;
         }
 
         protected override void OnStart()
         {
             _animatorDriver = new PigeonAnimatorDriver(FindAnimator());
             _collector = GetComponentInChildren<FemaleCollector>(true);
+            _rigidbody = GetComponent<Rigidbody>();
 
             DirectionVector = transform.forward;
 
@@ -52,7 +56,7 @@ namespace GGJ2016
         private float TargetSpeed;
         private float Acc;
 
-        private const float SpeedMulti = 10;
+        private const float SpeedMulti = 1;
         private const float AccTime = 0.2f;
 
         private void Update()
@@ -61,11 +65,24 @@ namespace GGJ2016
 
             Rotate(DirectionVector);
 
-            Speed = Mathf.SmoothDamp(Speed, TargetSpeed * SpeedMulti, ref Acc, AccTime);
+            //Speed = Mathf.SmoothDamp(Speed, TargetSpeed * SpeedMulti, ref Acc, AccTime);
+            _animatorDriver.Speed = Mathf.SmoothDamp(_animatorDriver.Speed, TargetSpeed * SpeedMulti, ref Acc, AccTime);
             transform.position += transform.forward * Speed * Time.deltaTime;
         }
 
-        
+        private void OnAnimatorMove()
+        {
+            if (_animator != null)
+            {
+                Vector3 newPos = _animator.rootPosition;
+                _rigidbody.MovePosition(newPos);
+
+                _animator.rootPosition = _rigidbody.position;
+            }
+        }
+
+
+
 
         private Vector3 MoveVector;
         private Vector3 DirectionVector;
@@ -104,7 +121,7 @@ namespace GGJ2016
 
         public void OnSwoopDown()
         {
-            Scorer.AddScore(2);
+            Scorer.AddScore(2 * _collector.GetScoreMulti());
         }
 
         public void OnSwoopUp()

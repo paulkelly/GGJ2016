@@ -9,4 +9,17 @@ public class PigeonAnimatorDriver
     {
         _animator = animator;
     }
+
+    public float Speed
+    {
+        get
+        {
+            return _animator.GetFloat("Speed");
+        }
+
+        set
+        {
+            _animator.SetFloat("Speed", value);
+        }
+    }
 }

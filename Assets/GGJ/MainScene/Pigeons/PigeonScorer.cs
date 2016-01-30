@@ -34,7 +34,7 @@ namespace GGJ2016
             }
         }
 
-        public const float MaxPuffyness = 3;
+        public const float MaxPuffyness = 2;
         public const float MinPuffyness = 1;
         public const float PuffynessIncreaseRate = 1;
         public const float PuffynessDecayRate = 0.5f;
