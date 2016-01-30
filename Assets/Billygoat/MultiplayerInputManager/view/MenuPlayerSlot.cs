@@ -57,6 +57,8 @@ namespace Billygoat.MultiplayerInput
                 if (_playerData.InControlDevice.Action1.WasReleased)
                 {
                     _playerData.Ready = true;
+
+                    InputSignals.PlayerReady.Dispatch(_playerData);
                 }
                 else if (_playerData.InControlDevice.Action2.WasReleased)
                 {

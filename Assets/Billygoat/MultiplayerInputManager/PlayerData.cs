@@ -1,5 +1,4 @@
 ﻿using InControl;
-using Billygoat.InputManager;
 
 namespace Billygoat.MultiplayerInput
 {

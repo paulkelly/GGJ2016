@@ -2,8 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Billygoat.InputManager;
-using Billygoat.InputManager.Implementations.InControlImpl;
 using InControl;
 using strange.extensions.context.api;
 
