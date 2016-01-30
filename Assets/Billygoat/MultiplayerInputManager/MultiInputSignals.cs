@@ -8,5 +8,7 @@ namespace Billygoat.MultiplayerInput
         public Signal<PlayerData> PlayerRemoved = new Signal<PlayerData>();
 
         public Signal<PlayerData> PlayerReady = new Signal<PlayerData>();
+
+        public Signal StartGame = new Signal();
     }
 }

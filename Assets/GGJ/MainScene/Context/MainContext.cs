@@ -18,7 +18,16 @@ namespace GGJ2016
             base.mapBindings();
 
             injectionBinder.Bind<PigeonSignals>().ToSingleton();
+            injectionBinder.Bind<PigeonScorer>().To<PigeonScorer>();
 
+            injectionBinder.Bind<GameObject>().ToValue(Find("FemalePigeon")).ToName("FemalePigeon");
+
+        }
+
+        private GameObject Find(string name)
+        {
+            GameObject result = ((GameObject)contextView).transform.FindChild(name).gameObject;
+            return result;
         }
     }
 }

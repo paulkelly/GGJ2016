@@ -15,7 +15,7 @@ namespace Billygoat.InputManager.GUI
 			    {
 			        return _fadeTime;
 			    }
-				return 0.3f;
+				return 1f;
 			}
 			
 			set

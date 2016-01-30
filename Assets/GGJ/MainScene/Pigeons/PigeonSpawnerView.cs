@@ -23,8 +23,11 @@ namespace GGJ2016
         [PostConstruct]
         public void OnConstruct()
         {
-            //TODO: Spawn All Players when from menu screen and remove input signals
-
+            foreach(var player in InputManager.GetPlayers())
+            {
+                Spawn(player);
+            }
+            
             if (AllowDebugSpawning)
             {
                 InputSignals.PlayerJoined.AddListener(Spawn);

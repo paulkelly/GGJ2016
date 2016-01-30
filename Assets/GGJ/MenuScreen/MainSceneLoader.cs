@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Billygoat.MultiplayerInput;
 using strange.extensions.mediation.impl;
-using UnityEngine.SceneManagement;
 
 public class MainSceneLoader : View
 {
@@ -31,7 +30,7 @@ public class MainSceneLoader : View
         //Debug.Log("Player " + player.id + " ready");
         if(AllPlayersReady())
         {
-            SceneManager.LoadScene("MainScene");
+            InputSignals.StartGame.Dispatch();
         }
     }
 
