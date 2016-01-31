@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Billygoat.MultiplayerInput;
 using strange.extensions.mediation.impl;
+using Billygoat.Audio;
 
 public class MainSceneLoader : View
 {
@@ -12,12 +13,20 @@ public class MainSceneLoader : View
     [Inject]
     public IMultiInputManager InputManager { get; set; }
 
+    [Inject]
+    public AudioSignals TheAudioSignals { get; set; }
+
+    public AudioClip[] IntroAudio;
+
     [PostConstruct]
     public void OnConstruct()
     {
         InputManager.Reset();
 
         InputSignals.PlayerReady.AddListener(OnPlayerReady);
+        AudioPlaylistType music = new AudioPlaylistType();
+        music.Clips.AddRange(IntroAudio);
+        TheAudioSignals.PlayMusicTrack.Dispatch(music);
     }
 
     protected override void OnDestroy()
