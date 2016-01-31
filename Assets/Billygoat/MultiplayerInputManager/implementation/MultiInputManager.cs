@@ -39,6 +39,11 @@ namespace Billygoat.MultiplayerInput
             get { return Devices.Values.ToArray(); }
         }
 
+        public void Reset()
+        {
+            Devices.Clear();
+        }
+
         private PlayerData GetPlayer(int id)
         {
             foreach (var player in AllPlayers)

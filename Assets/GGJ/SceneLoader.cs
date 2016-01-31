@@ -21,6 +21,7 @@ namespace GGJ2016
         public void OnConstruct()
         {
             InputSignals.StartGame.AddListener(StartGame);
+            InputSignals.EndGame.AddListener(EndGame);
         }
 
         protected override void OnDestroy()
@@ -30,6 +31,7 @@ namespace GGJ2016
             if (InputSignals != null)
             {
                 InputSignals.StartGame.RemoveListener(StartGame);
+                InputSignals.EndGame.RemoveListener(EndGame);
             }
         }
 
@@ -40,8 +42,10 @@ namespace GGJ2016
             TurnOffFader();
         }
 
+        private bool loading = false;
         void OnLevelWasLoaded(int level)
         {
+            loading = false;
             TurnOffFader();
         }
 
@@ -57,16 +61,29 @@ namespace GGJ2016
 
         public void StartGame()
         {
-            StartCoroutine(FadeOutAndStartGame());
+            if (!loading)
+            {
+                loading = true;
+                StartCoroutine(FadeOutAndLoad("MainScene"));
+            }
         }
 
-        private IEnumerator FadeOutAndStartGame()
+        public void EndGame()
+        {
+            if (!loading)
+            {
+                loading = true;
+                StartCoroutine(FadeOutAndLoad("Menu"));
+            }
+        }
+
+        private IEnumerator FadeOutAndLoad(string level)
         {
             fader.Visible = true;
 
             yield return new WaitForSeconds(1);
 
-            SceneManager.LoadScene("MainScene");
+            SceneManager.LoadScene(level);
         }
 
 

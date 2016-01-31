@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Billygoat.MultiplayerInput;
 using strange.extensions.mediation.impl;
 
 namespace GGJ2016
@@ -18,6 +19,14 @@ namespace GGJ2016
         private FemaleCollector _collector;
 
         private PigeonIKTarget _lookTarget;
+
+        public PlayerData Player
+        {
+            get
+            {
+                return GetComponent<PigeonController>().Player;
+            }
+        }
 
         [PostConstruct]
         public void OnConstruct()
@@ -65,14 +74,44 @@ namespace GGJ2016
         private void FixedUpdate()
         {
             _rigidbody.velocity = Vector3.zero;
+            _rigidbody.angularVelocity = Vector3.zero;
         }
+
+        public void LosePoints(float value)
+        {
+            Scorer.LoseScore(value);
+        }
+
+        public bool CanWin()
+        {
+            return Scorer.Score > 80;
+        }
+
+        private float NextTargetControl = 1;
+        private float TargetControl;
+        private float ControlV;
 
         private void Update()
         {
             if (Swooping)
             {
-                Scorer.AddScore(10 * Time.deltaTime * _collector.GetScoreMulti());
+                Scorer.AddScore(5 * Time.deltaTime * _collector.GetScoreMulti());
             }
+            else
+            {
+                Scorer.AddScore(Time.deltaTime * _collector.GetScoreMulti());
+            }
+
+            if (Swooping)
+            {
+                TargetControl = 0.3f;
+            }
+            else
+            {
+                TargetControl = NextTargetControl;
+            }
+
+            Control = Mathf.SmoothDamp(Control, TargetControl, ref ControlV, 0.2f);
 
             if (distractionTime > endDistractionTim)
             {
@@ -106,17 +145,17 @@ namespace GGJ2016
         private float endDistractionTim = 0;
 
         float minDistractionTime = 0.2f;
-        float maxDistractionTime = 0.5f;
+        float maxDistractionTime = 0.4f;
         private void PickDistractedDirection()
         {
+
+            NextTargetControl = Random.Range(0.7f, 1f);
 
             if (_lookTarget != null)
             {
                 //DistrationVector = transform.position - _lookTarget.position;
 
-                // DistrationVector = Vector3.Lerp(Vector3.left, Vector3.right, Random.Range(0f, 1f)).normalized;
-
-                DistrationVector = ConvertToWorldVector(new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized);
+                DistrationVector = ConvertToWorldVector(new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), 0).normalized);
             }
         }
 
@@ -170,20 +209,11 @@ namespace GGJ2016
 
         private void Rotate(Vector3 dir)
         {
-
-            if (Swooping)
-            {
-                //dir = DistrationVector;
-                Control = 0.2f;
-            }
-            else
-            {
-                Control = 1f;
-            }
-
             dir = Vector3.Lerp(DistrationVector, dir, Control);
 
-            float TurnSpeedMulti = 1 / Mathf.Max(_animatorDriver.Speed, 1);
+            //float TurnSpeedMulti = 1 / Mathf.Max(_animatorDriver.Speed, 1);
+            float angle = Quaternion.Angle(transform.rotation, Quaternion.LookRotation(dir));
+            float TurnSpeedMulti = Mathf.Max(0.3f, 1 * (angle / 180));
             if (dir.magnitude > 0.1f)
             {
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir),

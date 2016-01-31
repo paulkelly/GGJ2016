@@ -34,7 +34,7 @@ namespace GGJ2016
             }
         }
 
-        public const float MaxPuffyness = 2;
+        public const float MaxPuffyness = 2f;
         public const float MinPuffyness = 1;
         public const float PuffynessIncreaseRate = 1;
         public const float PuffynessDecayRate = 0.5f;
@@ -54,6 +54,11 @@ namespace GGJ2016
         public void AddScore(float amount)
         {
             Score += amount * Puffyness;
+        }
+
+        public void LoseScore(float amount)
+        {
+            Score = Mathf.Max(Score - amount, 0);
         }
 
         public void Update()
@@ -77,7 +82,7 @@ namespace GGJ2016
             float dist = Vector3.Distance(Male.position, Female.transform.position);
 
             //return Time.deltaTime * Mathf.Log(dist + 1, 2.718f);
-            return Time.deltaTime * Mathf.Log(dist + 1, 2) * 3;
+            return Time.deltaTime * Mathf.Log(dist + 1, 3) * 2f;
         }
 
     }

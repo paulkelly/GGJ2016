@@ -10,5 +10,6 @@ namespace Billygoat.MultiplayerInput
         public Signal<PlayerData> PlayerReady = new Signal<PlayerData>();
 
         public Signal StartGame = new Signal();
+        public Signal EndGame = new Signal();
     }
 }

@@ -41,8 +41,10 @@ namespace GGJ2016
             chrs.Add(transform);
         }
 
-        void Start()
+        protected override void OnStart()
         {
+            base.OnStart();
+
             OrigianlPosition = transform.position;
             OriginalRotation = transform.eulerAngles;
         }
@@ -71,7 +73,7 @@ namespace GGJ2016
             if (lookAt != Vector3.zero)
             {
                 lookAt = Vector3.SmoothDamp(lookAt, midPoint, ref vel, lerpTime);
-                cameraDistance = Mathf.SmoothDamp(cameraDistance, Mathf.Clamp(avDist * 2.5f, 1.5f, 30), ref distV, lerpTime);
+                cameraDistance = Mathf.SmoothDamp(cameraDistance, Mathf.Clamp(avDist, 0f, 5), ref distV, lerpTime);
             }
             else
             {
@@ -81,8 +83,11 @@ namespace GGJ2016
             Vector3 camZoomVector = OrigianlPosition - midPoint;
             if (cameraDistance > 0)
             {
-                transform.position = new Vector3(Mathf.Clamp(lookAt.x, -6, 6), OrigianlPosition.y + (cameraDistance/10),
-                    OrigianlPosition.z - (camZoomVector.z / cameraDistance));
+                //transform.position = new Vector3(Mathf.Clamp(lookAt.x, -6, 6), OrigianlPosition.y + (cameraDistance/10),
+                //    OrigianlPosition.z - (camZoomVector.z / cameraDistance));
+
+                transform.position = new Vector3(Mathf.Clamp(lookAt.x, -8, 8), OrigianlPosition.y + cameraDistance,
+                        lookAt.z - (3 + cameraDistance));
             }
 
             //transform.LookAt(lookAt);

@@ -9,6 +9,8 @@ namespace Billygoat.MultiplayerInput
         void TryRegisterDevice(InputDevice device);
         void TryRemovePlayer(PlayerData player);
 
+        void Reset();
+
         PlayerData[] GetPlayers();
     }
 }

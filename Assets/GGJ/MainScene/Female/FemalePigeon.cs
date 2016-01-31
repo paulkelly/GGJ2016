@@ -1,13 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
 using strange.extensions.mediation.impl;
+using Billygoat.MultiplayerInput;
 
 namespace GGJ2016
 {
     public class FemalePigeon : View
     {
+        [Inject]
+        public PigeonSignals ThePigeonSignals { get; set; }
 
-        private const float turnSpeed = 400f;
+        [Inject]
+        public MultiInputSignals InputSignals { get; set; }
+
+        private const float turnSpeed = 300f;
 
         private PigeonAnimatorDriver _animatorDriver;
         private FemaleCollector _collector;
@@ -41,15 +47,18 @@ namespace GGJ2016
 
             DirectionVector = transform.forward;
 
+            ThePigeonSignals.PigeonSpawned.Dispatch(transform);
+
             Annoyed = 0;
         }
 
         private float Speed;
         private float TargetSpeed;
+        private float NextTargetSpeed;
         private float Acc;
 
         private const float SpeedMulti = 1;
-        private const float AccTime = 0.2f;
+        private const float AccTime = 0.3f;
 
 
         private void OnCollisionStay(Collision collision)
@@ -61,12 +70,28 @@ namespace GGJ2016
                 DirectionVector = (position - contactPoint).normalized;
 
                 Annoyed = 1;
+
+                PigeonMover otherPigeon = collision.transform.GetComponent<PigeonMover>();
+                if (otherPigeon != null)
+                {
+                    if (otherPigeon.CanWin())
+                    {
+                        Annoyed = 0.5f;
+                        ThePigeonSignals.PlayerWins.Dispatch(otherPigeon.Player);
+                        InputSignals.EndGame.Dispatch();
+                    }
+                    else
+                    {
+                        otherPigeon.LosePoints(Time.deltaTime * 10);
+                    }
+                }
             }
         }
 
         private void FixedUpdate()
         {
             _rigidbody.velocity = Vector3.zero;
+            _rigidbody.angularVelocity = Vector3.zero;
         }
 
         private void Update()
@@ -84,7 +109,7 @@ namespace GGJ2016
                 distractionTime += Time.deltaTime;
             }
 
-            TargetSpeed = Mathf.Max(Random.RandomRange(0f, 1.2f), Annoyed*2);
+            TargetSpeed = Mathf.Max(NextTargetSpeed, Annoyed*2);
 
             Annoyed = Mathf.Lerp(Annoyed, 0, Time.deltaTime);
 
@@ -107,7 +132,25 @@ namespace GGJ2016
         float maxDistractionTime = 3f;
         private void PickDistractedDirection()
         {
-            DirectionVector = ConvertToWorldVector(new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized);
+            if (Random.Range(0, 100) > 20)
+            {
+                NextTargetSpeed = Random.Range(0.7f, 1.2f);
+            }
+            else
+            {
+                NextTargetSpeed = 0f;
+            }
+
+            if (transform.position.magnitude > 3)
+            {
+                Vector3 random = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f));
+
+                DirectionVector = (-transform.position + random).normalized;
+            }
+            else
+            {
+                DirectionVector = ConvertToWorldVector(new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized);
+            }
         }
 
         private void OnAnimatorMove()
@@ -143,8 +186,8 @@ namespace GGJ2016
 
             dir = Vector3.Lerp(DirectionVector, dir, Annoyed);
 
-            float TurnSpeedMulti = Mathf.Max(0.4f, Annoyed);
-            if (dir.magnitude > 0.1f)
+            float TurnSpeedMulti = Mathf.Max(0.3f, Annoyed);
+            if (dir.magnitude > 0.1f && _animatorDriver.Speed > 0.3f)
             {
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir),
                     turnSpeed * Time.deltaTime * TurnSpeedMulti);

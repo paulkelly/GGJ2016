@@ -15,6 +15,8 @@ public class MainSceneLoader : View
     [PostConstruct]
     public void OnConstruct()
     {
+        InputManager.Reset();
+
         InputSignals.PlayerReady.AddListener(OnPlayerReady);
     }
 

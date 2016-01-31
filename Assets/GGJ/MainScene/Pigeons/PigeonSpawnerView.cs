@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Billygoat.MultiplayerInput;
 using strange.extensions.mediation.impl;
+using System.Collections.Generic;
 
 namespace GGJ2016
 {
@@ -10,7 +11,7 @@ namespace GGJ2016
         public GameObject PigeonPrefab;
         public bool AllowDebugSpawning;
 
-
+        public List<Transform> SpawnPoints = new List<Transform>();
 
         [Inject]
         public IMultiInputManager InputManager { get; set; }
@@ -46,7 +47,10 @@ namespace GGJ2016
 
         private void Spawn(PlayerData player)
         {
-            GameObject newPigeon = (GameObject) Instantiate(PigeonPrefab, Vector3.zero, Quaternion.identity);
+            int spawnPoint = Random.Range(0, SpawnPoints.Count);
+
+            GameObject newPigeon = (GameObject) Instantiate(PigeonPrefab, SpawnPoints[spawnPoint].position, Quaternion.identity);
+            SpawnPoints.RemoveAt(spawnPoint);
 
             newPigeon.transform.parent = transform;
             PigeonController controller = newPigeon.GetComponent<PigeonController>();
