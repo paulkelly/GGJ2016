@@ -24,6 +24,8 @@ namespace GGJ2016
         private float MaxVolume = 1;
         private float _targetMaxVolume = 1;
 
+        public AnimationCurve Curve;
+
         [PostConstruct]
         public void OnConstruct()
         {
@@ -53,7 +55,7 @@ namespace GGJ2016
                 MaxScore = Mathf.Max(MaxScore, v);
             }
 
-            source.volume = Mathf.Clamp(MaxScore / 80, 0, MaxVolume);
+            source.volume = Curve.Evaluate(Mathf.Clamp((MaxScore / 80), 0, MaxVolume));
             MaxVolume = Mathf.Lerp(MaxVolume, _targetMaxVolume, Time.deltaTime);
         }
 
