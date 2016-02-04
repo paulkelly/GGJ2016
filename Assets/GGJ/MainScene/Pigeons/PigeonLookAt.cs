@@ -7,6 +7,20 @@ namespace GGJ2016
 {
     public class PigeonLookAt : MonoBehaviour
     {
+        public PigeonMover Pigeon;
+        private float Puffyness
+        {
+            get
+            {
+                if(Pigeon != null)
+                {
+                    return Pigeon.Scorer.NormalizedPuffyness();
+                }
+
+                return 0;
+            }
+         }
+
         public LookAtIK LookIK;
         public InterestingTarget Self;
 
@@ -37,31 +51,22 @@ namespace GGJ2016
                 SetLookAtWeight(0);
             }
 
-            if(LookIK.solver.IKPositionWeight != _targetWeight)
+            float nextTargetWeight = Mathf.Min((1.2f - Puffyness), _targetWeight);
+            if(Pigeon._inPosition)
             {
-                _weightLerpTime += Time.deltaTime;
-                float percComplete = _weightLerpTime / _maxWeightLerpTime;
-                if(percComplete < 1)
-                {
-                    LookIK.solver.IKPositionWeight = Mathf.Lerp(_initalWeight, _targetWeight, percComplete);
-                }
-                else
-                {
-                    LookIK.solver.IKPositionWeight = _targetWeight;
-                }
+                nextTargetWeight = 0;
             }
+
+            LookIK.solver.IKPositionWeight = Mathf.SmoothDamp(LookIK.solver.IKPositionWeight, nextTargetWeight, ref _weightV, _weightAcc);
         }
 
-        private float _initalWeight;
         private float _targetWeight;
-        private float _weightLerpTime;
-        private float _maxWeightLerpTime = 0.2f;
+        private float _weightV;
+        private const float _weightAcc = 0.3f;
 
         private void SetLookAtWeight(float target)
         {
-            _initalWeight = LookIK.solver.IKPositionWeight;
             _targetWeight = target;
-            _weightLerpTime = 0;
         }
 
         private InterestingTarget GetRandomTarget()

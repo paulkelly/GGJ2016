@@ -9,6 +9,7 @@ namespace GGJ2016
         public Signal<Transform> PigeonSpawned = new Signal<Transform>();
         public Signal<ScoreData> SetPigeonScore = new Signal<ScoreData>();
 
+        public Signal TurnOffSleezeMusic = new Signal();
         public Signal<PlayerData> PlayerWins = new Signal<PlayerData>();
     }
 

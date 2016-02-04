@@ -15,6 +15,8 @@ namespace GGJ2016
 
         private const float turnSpeed = 600f;
 
+        public SFXView Call;
+
         private PigeonAnimatorDriver _animatorDriver;
         private FemaleCollector _collector;
 
@@ -93,18 +95,26 @@ namespace GGJ2016
 
         private void Update()
         {
-            if (Swooping)
+            if (_waitForMate || _mating || _inPosition)
             {
-                Scorer.AddScore(5 * Time.deltaTime * _collector.GetScoreMulti());
+                _animatorDriver.Speed = 0;
+                _animatorDriver.Swooping = false;
+                return;
+            }
+                if (Swooping)
+            {
+                Scorer.PuffynessDecayMulti = 3;
+                Scorer.AddScore(1.4f * Time.deltaTime * _collector.GetScoreMulti());
             }
             else
             {
-                Scorer.AddScore(Time.deltaTime * _collector.GetScoreMulti());
+                Scorer.PuffynessDecayMulti = 1;
+                Scorer.AddScore(1.2f * Time.deltaTime * _collector.GetScoreMulti());
             }
 
             if (Swooping)
             {
-                TargetControl = 0.3f;
+                TargetControl = 0.9f;
             }
             else
             {
@@ -126,6 +136,8 @@ namespace GGJ2016
             }
 
             _animatorDriver.Swooping = Swooping;
+            //_animatorDriver.Puff = Mathf.Lerp(PigeonScorer.MinPuffyness, PigeonScorer.MaxPuffyness, Scorer.Puffyness);
+            _animatorDriver.Puff = Scorer.NormalizedPuffyness();
 
             Scorer.Update();
 
@@ -163,11 +175,70 @@ namespace GGJ2016
         {
             if (_animator != null)
             {
-                Vector3 newPos = _animator.rootPosition;
-                _rigidbody.MovePosition(newPos);
 
-                _animator.rootPosition = _rigidbody.position;
+                if (!_inPosition)
+                {
+                    Vector3 newPos = _animator.rootPosition;
+                    _rigidbody.MovePosition(newPos);
+
+                    _animator.rootPosition = _rigidbody.position;
+                }
+                else
+                {
+                    _rigidbody.isKinematic = true;
+                    transform.position = _animator.rootPosition;
+                    transform.rotation = _animator.rootRotation;
+                }
             }
+        }
+
+        public bool _waitForMate;
+        private bool _mating;
+        public bool _inPosition;
+        private Vector3 _initalPosition;
+        private Vector3 _finalPosition;
+        private Quaternion _initalRotation;
+        private Quaternion _finalRotation;
+        private float _matingLerpTime;
+        private float _totalMatingTime;
+        void LateUpdate()
+        {
+            if (_mating && !_inPosition)
+            {
+                _matingLerpTime += Time.deltaTime;
+                _animatorDriver.Speed = 0;
+                float percComplete = _matingLerpTime / _totalMatingTime;
+                if (percComplete < 1)
+                {
+                    transform.position = Vector3.Lerp(_initalPosition, _finalPosition, percComplete);
+                    transform.rotation = Quaternion.Lerp(_initalRotation, _finalRotation, percComplete);
+
+                    _animator.rootPosition = transform.position;
+                    _animator.rootRotation = transform.rotation;
+                }
+                else
+                {
+                    transform.position = _finalPosition;
+                    transform.rotation = _finalRotation;
+                    _animator.rootPosition = _finalPosition;
+                    _animator.rootRotation = _finalRotation;
+                    _animatorDriver.Mate();
+                    _inPosition = true;
+                }
+            }
+        }
+
+        public void StartMating(Transform target, float time)
+        {
+            _mating = true;
+            _initalPosition = transform.position;
+            _finalPosition = target.position;
+
+            _initalRotation = transform.rotation;
+            _finalRotation = target.rotation;
+
+            _matingLerpTime = 0;
+            _totalMatingTime = time;
         }
 
 
@@ -179,15 +250,13 @@ namespace GGJ2016
 
         public void Move(Vector2 value)
         {
+            TargetSpeed = value.magnitude;
 
             if (Swooping)
             {
-                DirectionVector = transform.forward;
                 TargetSpeed = 2;
-                return;
             }
 
-                TargetSpeed = value.magnitude;
             if (TargetSpeed < 0.3)
             {
                 DirectionVector = transform.forward;
@@ -209,7 +278,7 @@ namespace GGJ2016
 
         private void Rotate(Vector3 dir)
         {
-            dir = Vector3.Lerp(DistrationVector, dir, Control);
+            dir = Vector3.Lerp(DistrationVector.normalized, dir.normalized, Control);
 
             //float TurnSpeedMulti = 1 / Mathf.Max(_animatorDriver.Speed, 1);
             float angle = Quaternion.Angle(transform.rotation, Quaternion.LookRotation(dir));
@@ -239,7 +308,7 @@ namespace GGJ2016
 
         public void Caw()
         {
-
+            Call.Play();
         }
 
         public void Wings()

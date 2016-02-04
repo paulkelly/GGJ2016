@@ -81,6 +81,10 @@ namespace Billygoat.MultiplayerInput
                 go.transform.parent = contextView.transform;
             }
 
+//#if UNITY_STANDALONE_WIN
+//            InControl.InputManager.EnableXInput = true;
+//#endif
+
             InControl.InputManager.OnDeviceDetached += TryRemovePlayer;
         }
 

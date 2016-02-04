@@ -49,6 +49,21 @@ namespace GGJ2016
             TurnOffFader();
         }
 
+        void Update()
+        {
+            if (Input.GetKeyUp(KeyCode.Escape))
+            {
+                if(SceneManager.GetActiveScene().name.Equals(Main))
+                {
+                    if (!loading)
+                    {
+                        loading = true;
+                        StartCoroutine(FadeOutAndLoad("Menu"));
+                    }
+                }
+            }
+        }
+
         private void TurnOffFader()
         {
             if (fader == null)
@@ -73,15 +88,27 @@ namespace GGJ2016
             if (!loading)
             {
                 loading = true;
-                StartCoroutine(FadeOutAndLoad("Menu"));
+                StartCoroutine(FadeOutAndLoadEnd("Menu"));
             }
         }
 
-        private IEnumerator FadeOutAndLoad(string level)
+
+    private IEnumerator FadeOutAndLoad(string level, float delay = 1)
         {
             fader.Visible = true;
 
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(delay);
+
+            SceneManager.LoadScene(level);
+        }
+
+        private IEnumerator FadeOutAndLoadEnd(string level)
+        {
+            yield return new WaitForSeconds(6);
+
+            fader.Visible = true;
+
+            yield return new WaitForSeconds(2);
 
             SceneManager.LoadScene(level);
         }

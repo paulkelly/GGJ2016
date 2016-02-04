@@ -35,7 +35,7 @@ namespace GGJ2016
             music.Clips.Add(MainTheme);
             TheAudioSignals.PlayMusicTrack.Dispatch(music);
 
-            ThePigeonSignals.PlayerWins.AddListener(EndGame);
+            ThePigeonSignals.TurnOffSleezeMusic.AddListener(EndGame);
             ThePigeonSignals.SetPigeonScore.AddListener(ListenScores);
         }
 
@@ -43,7 +43,7 @@ namespace GGJ2016
         {
             base.OnDestroy();
 
-            ThePigeonSignals.PlayerWins.RemoveListener(EndGame);
+            ThePigeonSignals.TurnOffSleezeMusic.RemoveListener(EndGame);
             ThePigeonSignals.SetPigeonScore.RemoveListener(ListenScores);
         }
 
@@ -59,7 +59,7 @@ namespace GGJ2016
             MaxVolume = Mathf.Lerp(MaxVolume, _targetMaxVolume, Time.deltaTime);
         }
 
-        private void EndGame(PlayerData data)
+        private void EndGame()
         {
             _targetMaxVolume = 0;
         }

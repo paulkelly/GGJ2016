@@ -82,22 +82,24 @@ namespace Billygoat.MultiplayerInput
 
         }
 
+        public Color ready;
+        public Color notReady;
         protected virtual void SetImage()
         {
             if (_playerData != null)
             {
                 if (_playerData.Ready)
                 {
-                    _image.color = Color.green;
+                    _image.color = ready;
                 }
                 else
                 {
-                    _image.color = Color.red;
+                    _image.color = notReady;
                 }
             }
             else
             {
-                _image.color = Color.grey;
+                _image.color = Color.black;
             }
         }
 

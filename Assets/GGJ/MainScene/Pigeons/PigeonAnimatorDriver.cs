@@ -23,6 +23,19 @@ public class PigeonAnimatorDriver
         }
     }
 
+    public float Puff
+    {
+        get
+        {
+            return _animator.GetFloat("Puff");
+        }
+
+        set
+        {
+            _animator.SetFloat("Puff", value);
+        }
+    }
+
     public bool Swooping
     {
         get
@@ -34,5 +47,11 @@ public class PigeonAnimatorDriver
         {
             _animator.SetBool("Sprint", value);
         }
+    }
+
+    public void Mate()
+    {
+        _animator.ResetTrigger("Mate");
+        _animator.SetTrigger("Mate");
     }
 }

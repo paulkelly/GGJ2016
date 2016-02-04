@@ -9,6 +9,9 @@ namespace GGJ2016
 
         private PigeonMover _pigeonMover;
 
+        [Inject]
+        public MultiInputSignals InputSignals { get; set; }
+
         void Awake()
         {
             _pigeonMover = GetComponent<PigeonMover>();

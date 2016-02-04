@@ -19,6 +19,8 @@ namespace GGJ2016
 
         public int SlotNumber;
 
+        public RectTransform animated;
+
         [PostConstruct]
         public void OnConstruct()
         {
@@ -77,12 +79,27 @@ namespace GGJ2016
         }
 
         private CanvasGroupFader fader;
+
+        private Vector3 min = new Vector3(0.9f, 0.9f, 1);
+        private Vector3 max = new Vector3(1.1f, 1.1f, 1);
+        private float time = 0.5f;
         void Update()
         {
             if (_playerData != null)
             {
                 fader.Visible = true;
                 _scoreBar.SetScore(_score);
+
+                if(_score > 80)
+                {
+                    time += Time.deltaTime * 4;
+                    animated.localScale = Vector3.Lerp(min, max, Mathf.Abs(Mathf.Cos(time)));
+                }
+                else
+                {
+                    animated.localScale = Vector3.one;
+
+                }
             }
             else
             {
