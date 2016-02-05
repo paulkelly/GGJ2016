@@ -36,7 +36,7 @@ public class MainSceneLoader : View
         InputSignals.PlayerReady.RemoveListener(OnPlayerReady);
     }
 
-    private void OnPlayerReady(PlayerData player)
+    private void OnPlayerReady(PlayerDevice player)
     {
         //Debug.Log("Player " + player.id + " ready");
         if(AllPlayersReady())

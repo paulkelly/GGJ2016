@@ -30,9 +30,9 @@ namespace GGJ2016
             ThePigeonSignals.PlayerWins.RemoveListener(EndGame);
         }
 
-        private void EndGame(PlayerData player)
+        private void EndGame(PlayerDevice player)
         {
-            _image.color = Colors[player.id - 1];
+            _image.color = Colors[player.id];
             StartCoroutine(PlayAnim());
         }
 

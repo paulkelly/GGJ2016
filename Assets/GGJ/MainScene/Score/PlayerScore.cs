@@ -46,7 +46,7 @@ namespace GGJ2016
             ThePigeonSignals.SetPigeonScore.RemoveListener(SetScore);
         }
 
-        private PlayerData _playerData;
+        private PlayerDevice _playerData;
         private ScoreBar _scoreBar;
         private float _score;
 
@@ -58,7 +58,7 @@ namespace GGJ2016
             }
         }
 
-        public void OnPlayerJoined(PlayerData playerData)
+        public void OnPlayerJoined(PlayerDevice playerData)
         {
             if (playerData.id == SlotNumber)
             {
@@ -68,7 +68,7 @@ namespace GGJ2016
             }
         }
 
-        public void OnPlayerLeft(PlayerData playerData)
+        public void OnPlayerLeft(PlayerDevice playerData)
         {
             if (playerData.id == SlotNumber)
             {

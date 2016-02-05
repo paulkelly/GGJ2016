@@ -12,7 +12,7 @@ namespace GGJ2016
         [Inject]
         public PigeonSignals ThePigeonSignals { get; set; }
 
-        private PlayerData player;
+        private PlayerDevice player;
 
         private Transform _male;
         public Transform Male
@@ -39,10 +39,10 @@ namespace GGJ2016
             return (Puffyness - MinPuffyness) / (MaxPuffyness - MinPuffyness);
         }
 
-        public const float MaxPuffyness = 6f;
+        public const float MaxPuffyness = 1.8f;
         public const float MinPuffyness = 1;
-        public const float PuffynessIncreaseRate = 1f;
-        public const float PuffynessDecayRate = 0.5f;
+        public const float PuffynessIncreaseRate = 2f;
+        public const float PuffynessDecayRate = 0.2f;
         public float PuffynessDecayMulti = 1f;
 
         private float PuffynessTarget = 1;
@@ -93,7 +93,7 @@ namespace GGJ2016
             float dist = Vector3.Distance(Male.position, Female.transform.position);
 
             //return Time.deltaTime * Mathf.Log(dist + 1, 2.718f);
-            return Time.deltaTime * Mathf.Log(dist + 1, 3) * 3f;
+            return Time.deltaTime * Mathf.Log(dist + 1, 3) * 10f;
         }
 
     }

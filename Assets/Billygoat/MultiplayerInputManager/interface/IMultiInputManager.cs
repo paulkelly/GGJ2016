@@ -7,10 +7,10 @@ namespace Billygoat.MultiplayerInput
     public interface IMultiInputManager
     {
         void TryRegisterDevice(InputDevice device);
-        void TryRemovePlayer(PlayerData player);
+        void TryRemovePlayer(PlayerDevice player);
 
         void Reset();
 
-        PlayerData[] GetPlayers();
+        PlayerDevice[] GetPlayers();
     }
 }

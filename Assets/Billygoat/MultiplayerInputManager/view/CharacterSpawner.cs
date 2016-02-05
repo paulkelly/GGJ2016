@@ -1,14 +1,15 @@
-﻿using UnityEngine;
-using Billygoat.MultiplayerInput;
+﻿
+
+using UnityEngine;
 using strange.extensions.mediation.impl;
 using System.Collections.Generic;
 
-namespace GGJ2016
+namespace Billygoat.MultiplayerInput
 {
-    public class PigeonSpawnerView : View
+    public class CharacterSpawner : View
     {
 
-        public GameObject PigeonPrefab;
+        public GameObject CharacterPrefab;
         public bool AllowDebugSpawning;
 
         public List<Transform> SpawnPoints = new List<Transform>();
@@ -24,11 +25,11 @@ namespace GGJ2016
         [PostConstruct]
         public void OnConstruct()
         {
-            foreach(var player in InputManager.GetPlayers())
+            foreach (var player in InputManager.GetPlayers())
             {
                 Spawn(player);
             }
-            
+
             if (AllowDebugSpawning)
             {
                 InputSignals.PlayerJoined.AddListener(Spawn);
@@ -49,20 +50,23 @@ namespace GGJ2016
         {
             int spawnPoint = Random.Range(0, SpawnPoints.Count);
 
-            GameObject newPigeon = (GameObject) Instantiate(PigeonPrefab, SpawnPoints[spawnPoint].position, Quaternion.identity);
-            SpawnPoints.RemoveAt(spawnPoint);
-
-            newPigeon.transform.parent = transform;
-            PigeonController controller = newPigeon.GetComponent<PigeonController>();
-
-            if(controller != null)
+            GameObject newPlayer = (GameObject)Instantiate(CharacterPrefab, SpawnPoints[spawnPoint].position, Quaternion.identity);
+            if (!AllowDebugSpawning)
             {
-                newPigeon.name = "Pigeon " + player.id;
+                SpawnPoints.RemoveAt(spawnPoint);
+            }
+
+            newPlayer.transform.parent = transform;
+            CharacterController controller = newPlayer.GetComponent<CharacterController>();
+
+            if (controller != null)
+            {
+                newPlayer.name = "Player " + player.id;
                 controller.Player = player;
             }
             else
             {
-                Debug.LogError("Prefab does not have a pigeon controller");
+                Debug.LogError("Prefab does not have a character controller");
             }
         }
 

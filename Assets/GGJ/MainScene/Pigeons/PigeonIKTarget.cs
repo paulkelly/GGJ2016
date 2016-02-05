@@ -18,7 +18,8 @@ public class PigeonIKTarget : MonoBehaviour
     {
         if (Target != null)
         {
-            position = Vector3.SmoothDamp(position, Target.position, ref vel, SmoothDampTime);
+            Vector3 target = new Vector3(Target.position.x, transform.position.y, Target.position.z);
+            position = Vector3.SmoothDamp(position, target, ref vel, SmoothDampTime);
         }
         transform.position = position;
     }

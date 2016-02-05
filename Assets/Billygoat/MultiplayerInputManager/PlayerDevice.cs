@@ -2,11 +2,11 @@
 
 namespace Billygoat.MultiplayerInput
 {
-    public class PlayerData
+    public class PlayerDevice
     {
         public int id;
         public InputDevice InControlDevice;
 
-        public bool Ready = false;
+        public bool Ready;
     }
 }

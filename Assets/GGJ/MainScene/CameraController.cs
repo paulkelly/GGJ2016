@@ -80,7 +80,7 @@ namespace GGJ2016
                 lookAt = midPoint;
             }
 
-            Vector3 camZoomVector = OrigianlPosition - midPoint;
+           // Vector3 camZoomVector = OrigianlPosition - midPoint;
             if (cameraDistance > 0)
             {
                 //transform.position = new Vector3(Mathf.Clamp(lookAt.x, -6, 6), OrigianlPosition.y + (cameraDistance/10),

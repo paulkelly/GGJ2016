@@ -5,7 +5,7 @@ namespace GGJ2016
 {
     public class PigeonController : MonoBehaviour
     {
-        public PlayerData Player;
+        public PlayerDevice Player;
 
         private PigeonMover _pigeonMover;
 

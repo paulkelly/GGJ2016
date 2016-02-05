@@ -4,13 +4,12 @@ namespace Billygoat.MultiplayerInput
 {
     public class MultiInputSignals
     {
-        public Signal<PlayerData> PlayerJoined = new Signal<PlayerData>();
-        public Signal<PlayerData> PlayerRemoved = new Signal<PlayerData>();
-
-        public Signal<PlayerData> PlayerReady = new Signal<PlayerData>();
+        public Signal<PlayerDevice> PlayerJoined = new Signal<PlayerDevice>();
+        public Signal<PlayerDevice> PlayerRemoved = new Signal<PlayerDevice>();
+        public Signal<PlayerDevice> PlayerDeviceChanged = new Signal<PlayerDevice>();
 
         public Signal StartGame = new Signal();
         public Signal EndGame = new Signal();
-        public Signal ReturnToMenu = new Signal();
+        public Signal<PlayerDevice> PlayerReady = new Signal<PlayerDevice>();
     }
 }

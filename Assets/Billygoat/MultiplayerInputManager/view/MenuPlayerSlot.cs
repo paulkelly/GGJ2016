@@ -1,9 +1,18 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using strange.extensions.mediation.impl;
 using UnityEngine.UI;
+using Billygoat.InputManager.GUI;
 
 namespace Billygoat.MultiplayerInput
 {
+    public enum PlayerStatus
+    {
+        Disconnected,
+        Connected,
+        Ready
+    }
+
     public class MenuPlayerSlot : View
     {
         [Inject]
@@ -18,10 +27,12 @@ namespace Billygoat.MultiplayerInput
         [PostConstruct]
         public void OnConstruct()
         {
+            _image = GetComponent<Image>();
+
             InputSignals.PlayerJoined.AddListener(OnPlayerJoined);
             InputSignals.PlayerRemoved.AddListener(OnPlayerLeft);
 
-            _image = GetComponent<Image>();
+            OnStatusUpdated(Status);
         }
 
         protected override void OnDestroy()
@@ -32,75 +43,103 @@ namespace Billygoat.MultiplayerInput
             InputSignals.PlayerRemoved.AddListener(OnPlayerLeft);
         }
 
-        private PlayerData _playerData;
+        private PlayerDevice _playerDevice;
+        private bool _ready = false;
+        private PlayerStatus _status = PlayerStatus.Disconnected;
 
-        public void OnPlayerJoined(PlayerData playerData)
+        private PlayerStatus Status
         {
-            if (playerData.id == SlotNumber)
+            get { return _status; }
+            set
             {
-                _playerData = playerData;
+                _status = value;
+                OnStatusUpdated(_status);
             }
         }
 
-        public void OnPlayerLeft(PlayerData playerData)
+        public void OnPlayerJoined(PlayerDevice playerDevice)
         {
-            if (playerData.id == SlotNumber)
+            if (playerDevice.id == SlotNumber)
             {
-                _playerData = null;
+                _playerDevice = playerDevice;
+                Status = PlayerStatus.Connected;
+            }
+        }
+
+        public void OnPlayerLeft(PlayerDevice playerDevice)
+        {
+            if (playerDevice.id == SlotNumber)
+            {
+                _playerDevice = null;
+                Status = PlayerStatus.Disconnected;
             }
         }
 
         void Update()
         {
-            if (_playerData != null)
+            if (_playerDevice != null)
             {
-                if (_playerData.InControlDevice.Action1.WasReleased)
+                if (_playerDevice.InControlDevice.Action1.WasReleased)
                 {
-                    _playerData.Ready = true;
-
-                    InputSignals.PlayerReady.Dispatch(_playerData);
+                    _ready = true;
+                    Status = PlayerStatus.Ready;
                 }
-                else if (_playerData.InControlDevice.Action2.WasReleased)
+                else if (_playerDevice.InControlDevice.Action2.WasReleased)
                 {
-                    if(_playerData.Ready)
+                    if(_ready)
                     {
-                        _playerData.Ready = false;
+                        _ready = false;
+                        Status = PlayerStatus.Connected;
                     }
                     else
                     {
-                        InputManager.TryRemovePlayer(_playerData);
+                        InputManager.TryRemovePlayer(_playerDevice);
                     }
-                    
                 }
             }
 
-            SetImage();
-        }
+            if(_playerDevice != null)
+            {
+                _playerDevice.Ready = _ready;
 
-        protected virtual void OnReady()
-        {
+                bool allReady = true;
+                foreach (var player in InputManager.GetPlayers())
+                {
+                    allReady &= player.Ready;
+                }
+
+                if (allReady)
+                {
+                    InputSignals.StartGame.Dispatch();
+                }
+            }
 
         }
 
         public Color ready;
         public Color notReady;
-        protected virtual void SetImage()
+        public CanvasGroupFader AButton;
+        protected virtual void OnStatusUpdated(PlayerStatus status)
         {
-            if (_playerData != null)
+            if (_playerDevice != null)
             {
-                if (_playerData.Ready)
+                if (_ready)
                 {
                     _image.color = ready;
+                    AButton.Visible = false;
                 }
                 else
                 {
                     _image.color = notReady;
+                    AButton.Visible = true;
                 }
             }
             else
             {
                 _image.color = Color.black;
+                AButton.Visible = false;
             }
+
         }
 
 

@@ -13,6 +13,9 @@ namespace GGJ2016
         [Inject]
         public PigeonSignals ThePigeonSignals { get; set; }
 
+        public Renderer PlayerIndicator;
+        public Color[] PlayerColors;
+
         private const float turnSpeed = 600f;
 
         public SFXView Call;
@@ -22,7 +25,7 @@ namespace GGJ2016
 
         private PigeonIKTarget _lookTarget;
 
-        public PlayerData Player
+        public PlayerDevice Player
         {
             get
             {
@@ -34,6 +37,8 @@ namespace GGJ2016
         public void OnConstruct()
         {
             Scorer.Male = transform;
+            PlayerIndicator.material = Instantiate(PlayerIndicator.material) as Material;
+            PlayerIndicator.material.color = PlayerColors[Player.id];
         }
 
         private Rigidbody _rigidbody;
@@ -104,12 +109,12 @@ namespace GGJ2016
                 if (Swooping)
             {
                 Scorer.PuffynessDecayMulti = 3;
-                Scorer.AddScore(1.4f * Time.deltaTime * _collector.GetScoreMulti());
+                Scorer.AddScore(10f * Time.deltaTime * _collector.GetScoreMulti());
             }
             else
             {
                 Scorer.PuffynessDecayMulti = 1;
-                Scorer.AddScore(1.2f * Time.deltaTime * _collector.GetScoreMulti());
+                Scorer.AddScore(6f * Time.deltaTime * _collector.GetScoreMulti());
             }
 
             if (Swooping)

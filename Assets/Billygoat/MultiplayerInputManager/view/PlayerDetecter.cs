@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using InControl;
 using strange.extensions.mediation.impl;
 
 namespace Billygoat.MultiplayerInput
@@ -16,7 +17,7 @@ namespace Billygoat.MultiplayerInput
             {
                 foreach (var device in InControl.InputManager.Devices)
                 {
-                    if (device.MenuWasPressed)
+                    if (JoinButtonWasPressedOnDevice(device))
                     {
                         InputManager.TryRegisterDevice(device);
                     }
@@ -26,6 +27,12 @@ namespace Billygoat.MultiplayerInput
             {
                 Debug.Log("IM not setup");
             }
+        }
+
+
+        bool JoinButtonWasPressedOnDevice(InputDevice inputDevice)
+        {
+            return inputDevice.MenuWasPressed || inputDevice.Action1.WasReleased;
         }
     }
 }

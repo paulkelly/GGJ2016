@@ -11,55 +11,33 @@ namespace Billygoat.MultiplayerInput
     {
         private const string GAMEOBJECT_NAME = "InControl";
 
-        private int NextId
-        {
-            get
-            {
-                for(int i=1; i<=10; i++)
-                {
-                    if(!HasPlayerId(i))
-                    {
-                        return i;
-                    }
-                }
-                return 0;
-            }
-        }
-
         [Inject(ContextKeys.CONTEXT_VIEW)]
         public GameObject contextView { get; set; }
 
         [Inject]
         public MultiInputSignals InputSignals { get; set; }
 
-        private Dictionary<InputDevice, PlayerData> Devices = new Dictionary<InputDevice, PlayerData>();
+        public List<PlayerDevice> Players = new List<PlayerDevice>();
+        public List<PlayerDevice> XInputDevices = new List<PlayerDevice>();
 
-        private PlayerData[] AllPlayers
+        private int NextId
         {
-            get { return Devices.Values.ToArray(); }
-        }
-
-        public void Reset()
-        {
-            Devices.Clear();
-        }
-
-        private PlayerData GetPlayer(int id)
-        {
-            foreach (var player in AllPlayers)
+            get
             {
-                if(player.id == id)
+                for (int i = 0; i < 4; i++)
                 {
-                    return player;
+                    if (!HasPlayerId(i))
+                    {
+                        return i;
+                    }
                 }
+                return -1;
             }
-
-            return null;
         }
 
         private bool HasPlayerId(int id)
         {
-            foreach (var player in AllPlayers)
+            foreach (var player in Players)
             {
                 if (player.id == id)
                 {
@@ -67,7 +45,82 @@ namespace Billygoat.MultiplayerInput
                 }
             }
 
+            foreach (var xInput in XInputDevices)
+            {
+                if (xInput.id == id)
+                {
+                    return true;
+                }
+            }
+
             return false;
+        }
+
+
+        public void TryRegisterDevice(InputDevice device)
+        {
+            if (IsDeviceAdded(device))
+            {
+                return;
+            }
+
+            int playerId = -1;
+            if (isXInputDevice(device))
+            {
+                XInputDevice xInputDevice = device as XInputDevice;
+                playerId = xInputDevice.DeviceIndex;
+            }
+            else
+            {
+                playerId = NextId;
+            }
+
+            if (playerId >= 0)
+            {
+                PlayerDevice newPlayer = new PlayerDevice()
+                {
+                    id = playerId,
+                    InControlDevice = device
+                };
+                AddPlayer(newPlayer);
+            }
+        }
+
+        private void AddPlayer(PlayerDevice newPlayer)
+        {
+            Players.Add(newPlayer);
+            InputSignals.PlayerJoined.Dispatch(newPlayer);
+        }
+
+        public void TryRemovePlayer(PlayerDevice player)
+        {
+            if (Players.Contains(player))
+            {
+                Players.Remove(player);
+                InputSignals.PlayerRemoved.Dispatch(player);
+            }
+        }
+
+        private bool IsDeviceAdded(InputDevice inputDevice)
+        {
+            foreach (var player in Players)
+            {
+                if (player.InControlDevice == inputDevice)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void Reset()
+        {
+            Players.Clear();
+        }
+
+        public PlayerDevice[] GetPlayers()
+        {
+            return Players.ToArray();
         }
 
         [PostConstruct]
@@ -81,48 +134,91 @@ namespace Billygoat.MultiplayerInput
                 go.transform.parent = contextView.transform;
             }
 
-//#if UNITY_STANDALONE_WIN
-//            InControl.InputManager.EnableXInput = true;
-//#endif
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+            EnableXInput();
+#endif
 
-            InControl.InputManager.OnDeviceDetached += TryRemovePlayer;
+            InControl.InputManager.OnDeviceAttached += DevicesChanged;
+            InControl.InputManager.OnDeviceDetached += DevicesChanged;
         }
 
-        public void TryRegisterDevice(InputDevice device)
+        private void EnableXInput()
         {
-            if (!Devices.ContainsKey(device))
+            InControl.InputManager.EnableXInput = true;
+            InControl.InputManager.Reload();
+
+            RefreshXinputDevices();
+        }
+
+        void DevicesChanged(InputDevice device)
+        {
+            RefreshXinputDevices();
+            RemoveUnknownDevices();
+        }
+
+        void RefreshXinputDevices()
+        {
+            XInputDevices.Clear();
+            foreach (var xInputDevice in GetXInputDevices())
             {
-                PlayerData newPlayer = new PlayerData()
+                PlayerDevice newPlayer = new PlayerDevice()
                 {
-                    id = NextId,
-                    InControlDevice = device
+                    id = xInputDevice.DeviceIndex,
+                    InControlDevice = xInputDevice
                 };
-                Devices.Add(device, newPlayer);
-
-                InputSignals.PlayerJoined.Dispatch(newPlayer);
+                XInputDevices.Add(newPlayer);
             }
         }
 
-        public void TryRemovePlayer(InputDevice device)
+        void RemoveUnknownDevices()
         {
-            if (Devices.ContainsKey(device))
+            List<PlayerDevice> tmp = new List<PlayerDevice>();
+            tmp.AddRange(Players);
+            foreach (var player in tmp)
             {
-                PlayerData toRemove;
-                Devices.TryGetValue(device, out toRemove);
-                Devices.Remove(device);
-
-                InputSignals.PlayerRemoved.Dispatch(toRemove);
+                TryConnectXInputPlayer(player);
             }
         }
 
-        public void TryRemovePlayer(PlayerData player)
+        private void TryConnectXInputPlayer(PlayerDevice device)
         {
-            TryRemovePlayer(player.InControlDevice);
+            foreach (var xinput in XInputDevices)
+            {
+                if (xinput.id == device.id)
+                {
+                    if (!xinput.InControlDevice.Equals(device.InControlDevice))
+                    {
+                        xinput.InControlDevice = device.InControlDevice;
+                        InputSignals.PlayerDeviceChanged.Dispatch(xinput);
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+            }
+
+            //Remove player if not found in XInputDevices as that player has lost connection to its device
+            TryRemovePlayer(device);
         }
 
-        public PlayerData[] GetPlayers()
+        public List<XInputDevice> GetXInputDevices()
         {
-            return AllPlayers;
+            List<XInputDevice> xInputDevices = new List<XInputDevice>();
+
+            foreach (var device in InControl.InputManager.Devices)
+            {
+                if (isXInputDevice(device))
+                {
+                    xInputDevices.Add(device as XInputDevice);
+                }
+            }
+            return xInputDevices;
+        }
+
+        private bool isXInputDevice(InputDevice device)
+        {
+            return device is XInputDevice;
         }
     }
 }

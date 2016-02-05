@@ -313,10 +313,12 @@ namespace GGJ2016
 
 
         private float MaxScore = 0;
-        private int WinningPlayer = 1;
+        private int WinningPlayer = 0;
         private Dictionary<int, float> scores = new Dictionary<int, float>();
+        private Dictionary<int, float> interest = new Dictionary<int, float>();
 
         public Color[] Colors;
+        public ParticleSystem[] ParticleSystem;
         public ParticleSystem particles;
         public Material ParticalMat;
 
@@ -332,9 +334,31 @@ namespace GGJ2016
                 }
             }
 
-            particles.emissionRate = (MaxScore / 100) * 3;
-            particles.startColor = Color.Lerp(particles.startColor, Colors[WinningPlayer-1], Time.deltaTime * 4);
-            //ParticalMat.SetColor("_TintColor", Color.Lerp(ParticalMat.GetColor("_TintColor"), Colors[WinningPlayer], Time.deltaTime*4));
+            foreach(var ps in ParticleSystem)
+            {
+                ps.emissionRate = 0;
+            }
+
+            if (MaxScore > 80)
+            {
+                if(particles.emissionRate < 0.5f)
+                {
+                    particles.startColor = Colors[WinningPlayer];
+                }
+                particles.emissionRate = (MaxScore / 100) * 3;
+                particles.startColor = Color.Lerp(particles.startColor, Colors[WinningPlayer], Time.deltaTime * 4);
+            }
+            else
+            {
+                particles.emissionRate = 0;
+
+                foreach (KeyValuePair<int, float> v in interest)
+                {
+                    ParticleSystem[v.Key].emissionRate = v.Value * 5;
+                }
+            }
+
+
         }
 
         private void ListenScores(ScoreData data)
@@ -342,11 +366,13 @@ namespace GGJ2016
             int key = data.Player.id;
             if (scores.ContainsKey(key))
             {
+                interest[key] = data.Score - scores[key];
                 scores[key] = data.Score;
             }
             else
             {
                 scores.Add(key, data.Score);
+                interest.Add(key, data.Score);
             }
         }
     }

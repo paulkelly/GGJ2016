@@ -10,12 +10,12 @@ namespace GGJ2016
         public Signal<ScoreData> SetPigeonScore = new Signal<ScoreData>();
 
         public Signal TurnOffSleezeMusic = new Signal();
-        public Signal<PlayerData> PlayerWins = new Signal<PlayerData>();
+        public Signal<PlayerDevice> PlayerWins = new Signal<PlayerDevice>();
     }
 
     public class ScoreData
     {
-        public PlayerData Player;
+        public PlayerDevice Player;
         public float Score;
     }
 }
